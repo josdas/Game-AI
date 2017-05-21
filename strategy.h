@@ -5,8 +5,8 @@
 struct Strategy {
 	size_t unit_id;
 
-	explicit Strategy(size_t id_unit)
-		: unit_id(id_unit) {}
+	explicit Strategy(size_t unit_id)
+		: unit_id(unit_id) {}
 
 	virtual ~Strategy() = default;
 
