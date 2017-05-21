@@ -2,11 +2,13 @@
 #include "field.h"
 #include <vector>
 #include "../GameConst.h"
+#include <ostream>
 
 struct Action;
 class Unit;
 
 class World {
+
 	Field field;
 	std::vector<Unit*> units;
 public:
@@ -23,4 +25,5 @@ public:
 	void shot(Point start, Point dp, int damage, int time = MAX_TIME_GAME);
 
 	void update_unit(Action action);
+	friend std::ostream& operator<<(std::ostream& os, const World& obj);
 };

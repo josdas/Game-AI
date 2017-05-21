@@ -1,8 +1,22 @@
 #pragma once
 #include <vector>
 #include "layers.h"
+#include <ostream>
 
 struct Neural_coef {
+	friend std::ostream& operator<<(std::ostream& out, const Neural_coef& a) {
+		out << a.layers_size.size() << '\n';
+		for (auto v : a.layers_size) {
+			out << v << ' ';
+		}
+		out << '\n';
+		out << a.coefficient.size() << '\n';
+		for (auto v : a.coefficient) {
+			out << v << ' ';
+		}
+		return out;
+	}
+
 	std::vector<size_t> layers_size;
 	std::vector<double> coefficient; 
 	

@@ -76,3 +76,21 @@ void World::update_unit(Action action) {
 		}
 	}
 }
+
+std::ostream& operator<<(std::ostream& os, const World& obj) {
+	std::vector<std::vector<char> > field(obj.get_h(), std::vector<char>(obj.get_w(), '.'));
+	for (size_t i = 0; i < obj.get_units().size(); i++) {
+		auto u = obj.get_units()[i];
+		field[u->get_x()][u->get_y()] = '0' + static_cast<char>(i); // the number of units is less than 10
+		os << "Hp " << i << " = " << u->get_hp() << '\n';
+	}
+
+	for (auto& u : field) {
+		for (auto& v : u) {
+			os << v;
+		}
+		os << '\n';
+	}
+	os << '\n';
+	return os;
+}
