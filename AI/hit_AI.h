@@ -1,9 +1,10 @@
 #pragma once
 #include "strategy.h"
+#include "../Game/unit.h"
 
-class Shot_AI : public Strategy {
+class Hit_AI : public Strategy {
 	Direction get_direction(Point p) const {
-		if (abs(p.x) > abs(p.y) || p.x == 0) {
+		if (abs(p.x) < abs(p.y) || p.x == 0) {
 			if (p.y > 0) {
 				return LEFT;
 			}
@@ -21,7 +22,7 @@ class Shot_AI : public Strategy {
 	}
 
 public:
-	explicit Shot_AI(size_t id_unit)
+	explicit Hit_AI(size_t id_unit)
 		: Strategy(id_unit) {}
 
 	Action next_action(World* world) const override {

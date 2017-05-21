@@ -1,6 +1,5 @@
 #pragma once
-#include "world.h"
-#include "unit.h"
+#include "../Game/unit.h"
 
 struct Strategy {
 	size_t unit_id;

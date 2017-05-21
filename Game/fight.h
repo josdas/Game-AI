@@ -1,6 +1,6 @@
 #pragma once
 #include "world.h"
-#include "strategy.h"
+#include "../AI/strategy.h"
 
 class Fight {
 	static const int MAX_TIME_GAME = 100;

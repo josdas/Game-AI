@@ -1,6 +1,7 @@
 #pragma once
-#include "neural_network.h"
 #include "strategy.h"
+#include <algorithm>
+#include "../Game/unit.h"
 
 class Neural_AI : public Strategy {
 	Neural_network neural_network;

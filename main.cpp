@@ -1,12 +1,13 @@
 #include <iostream>
-#include "world.h"
-#include "random_AI.h"
-#include "fight.h"
-#include "shot_AI.h"
-#include "hit_AI.h"
-#include "neural_network.h"
-#include "neural_AI.h"
 #include <memory>
+#include "Game/world.h"
+#include "Game/fight.h"
+#include "Neural/neural_network.h"
+#include "AI/strategy.h"
+#include "AI/shot_AI.h"
+#include "AI/neural_AI.h"
+#include "AI/hit_AI.h"
+#include "Game/unit.h"
 
 using namespace std;
 
@@ -17,9 +18,9 @@ void print_world(World* world) {
 		field[u->get_x()][u->get_y()] = '0' + static_cast<char>(i); // the number of units is less than 10
 		cout << "Hp " << i << " = " << u->get_hp() << '\n';
 	}
-	
-	for(auto &u : field) {
-		for(auto &v : u) {
+
+	for (auto& u : field) {
+		for (auto& v : u) {
 			cout << v;
 		}
 		cout << '\n';
@@ -37,17 +38,15 @@ void print_with_pause(World* world, Fight* fight) {
 double Test_neural_network(Neural_network const& neural_network) {
 	double result = 0;
 	vector<shared_ptr<Strategy> > strategies = {
-		shared_ptr<Strategy>(new Shot_AI(0)),
-		shared_ptr<Strategy>(new Hit_AI(0))
+		(std::make_shared<Shot_AI>(0)),
+		(std::make_shared<Hit_AI>(0))
 	};
-	shared_ptr<Strategy> neural_AI = shared_ptr<Strategy>(
-		new Neural_AI(
-			1,
-			neural_network
-		)
+	shared_ptr<Strategy> neural_AI = std::make_shared<Neural_AI>(
+		1,
+		neural_network
 	);
 
-	for(int i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		int strateg = rand() % strategies.size();
 		Field field(5, 5);
 		Unit unit_first(Point(0, 0), 100);
@@ -70,7 +69,7 @@ int main() {
 	World world(field, &unit_first, &unit_second);
 	Fight fight(&world, &first, &second);
 
-	for(int i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		print_with_pause(&world, &fight);
 	}
 }
