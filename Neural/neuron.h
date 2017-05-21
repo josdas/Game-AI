@@ -2,15 +2,21 @@
 #include <vector>
 #include <cassert>
 
-class Neuron {
+struct Neuron {
 	std::vector<double> weight;
 
 	static double active_function(double x) {
 		return 1 / (1 + std::exp(-x));
 	}
-public:
 	explicit Neuron(const std::vector<double>& weight)
 		: weight(weight) {}
+
+	explicit Neuron(size_t s)
+		: weight(s) {
+		for(auto &v : weight) {
+			v = (rand() - RAND_MAX / 2) * 1.0 / RAND_MAX;
+		}
+	}
 
 	double get(std::vector<double> const& data) const {
 		assert(weight.size() == data.size());
@@ -23,5 +29,9 @@ public:
 
 	std::vector<double> const& get_weight() const {
 		return weight;
+	}
+
+	void set(size_t a, double c) {
+		weight[a] = c;
 	}
 };

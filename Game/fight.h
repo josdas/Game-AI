@@ -3,7 +3,7 @@
 #include "../AI/strategy.h"
 
 class Fight {
-	static const int MAX_TIME_GAME = 100;
+	static const int MAX_TIME_GAME = 30;
 
 	World* world;
 	Strategy* first;

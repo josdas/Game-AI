@@ -11,9 +11,9 @@ struct Strategy {
 
 	Action get_next_action(World* world) const {
 		auto action = next_action(world);
-		std::cout << unit_id  << ' ' 
+		/*std::cout << unit_id  << ' ' 
 		<< action.action  << ' ' 
-		<< action.direction << '\n';
+		<< action.direction << '\n';*/
 		return action;
 	}
 protected:
