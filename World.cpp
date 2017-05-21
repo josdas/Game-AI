@@ -62,7 +62,7 @@ void World::update_unit(Action action) {
 		case GO:
 			unit->go(action.direction, this);
 			break;
-		case SHOUT:
+		case SHOT:
 			unit->shot(action.direction, this);
 			break;
 		case HIT:

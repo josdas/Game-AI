@@ -14,7 +14,7 @@ enum Direction {
 
 enum Action_type {
 	GO,
-	SHOUT,
+	SHOT,
 	HIT,
 	SLEEP
 };
