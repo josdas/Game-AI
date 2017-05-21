@@ -57,6 +57,10 @@ public:
 		return cordinate.x;
 	}
 
+	int get_time() const {
+		return time_to_next_turn;
+	}
+
 	int get_y() const {
 		return cordinate.y;
 	}
