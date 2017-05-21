@@ -2,6 +2,7 @@
 #include "strategy.h"
 #include <algorithm>
 #include "../Game/unit.h"
+#include "../GameConst.h"
 
 class Neural_AI : public Strategy {
 	Neural_network neural_network;
@@ -11,11 +12,17 @@ class Neural_AI : public Strategy {
 		size_t enemy_id = unit_id ^ 1;
 		auto units = world->get_units();
 		for (size_t i : {unit_id, enemy_id}) {
-			data.push_back(units[i]->get_hp() / 100.0); //Normalize
-			data.push_back(units[i]->get_x() / 5.0);
-			data.push_back(units[i]->get_y() / 5.0);
-			data.push_back(units[i]->get_time() / 5.0);
+			data.push_back(units[i]->get_hp() / START_HP); //Normalize
+			data.push_back(units[i]->get_x() / MAX_H);
+			data.push_back(units[i]->get_y() / MAX_W);
+			data.push_back(units[i]->get_time());
 		}
+		data.push_back((units[unit_id]->get_x() - units[enemy_id]->get_x()) / MAX_H);
+		data.push_back((units[unit_id]->get_y() - units[enemy_id]->get_y()) / MAX_W);
+		data.push_back(units[unit_id]->get_x() == units[enemy_id]->get_x());
+		data.push_back(units[unit_id]->get_y() == units[enemy_id]->get_y());
+		data.push_back(units[unit_id]->get_x() < units[enemy_id]->get_x());
+		data.push_back(units[unit_id]->get_y() < units[enemy_id]->get_y());
 		return data;
 	}
 

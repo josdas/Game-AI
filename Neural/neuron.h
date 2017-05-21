@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include "../Random.h"
 
-struct Neuron {
+class Neuron {
 	std::vector<double> weight;
 
 	static double active_function(double x) {
@@ -11,10 +12,11 @@ struct Neuron {
 	explicit Neuron(const std::vector<double>& weight)
 		: weight(weight) {}
 
+public:
 	explicit Neuron(size_t s)
 		: weight(s) {
 		for(auto &v : weight) {
-			v = (rand() - RAND_MAX / 2) * 1.0 / RAND_MAX;
+			v = get_rand_double(1);
 		}
 	}
 

@@ -4,9 +4,12 @@
 struct Point {
 	int x, y;
 
+
 	Point(int x, int y)
 		: x(x),
 		  y(y) {}
+
+	Point() : Point(0, 0) {}
 
 	friend Point operator+(Point a, Point b) {
 		return Point(a.x + b.x, a.y + b.y);

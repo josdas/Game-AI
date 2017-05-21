@@ -11,10 +11,11 @@ struct Neural_coef {
 		coefficient(coefficient) {}
 };
 
-struct Neural_network {
+class Neural_network {
 	std::vector<Layer> layers;
 	std::vector<size_t> layers_size;
 
+public:
 	Neural_network(const std::vector<Layer>& layers, const std::vector<size_t>& layers_size)
 		: layers(layers),
 		layers_size(layers_size) {}
@@ -63,13 +64,5 @@ struct Neural_network {
 			}
 		}
 		return Neural_coef(layers_size, result);
-	}
-
-	int count_neurals() const {
-		int sum = 0;
-		for(size_t i = 1; i < layers_size.size(); i++) {
-			sum += layers_size[i];
-		}
-		return sum;
 	}
 };

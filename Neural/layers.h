@@ -1,9 +1,10 @@
 #pragma once
 #include "neuron.h"
 
-struct Layer {
+class Layer {
 	std::vector<Neuron> neurons;
 
+public:
 	explicit Layer(const std::vector<Neuron>& neurons)
 		: neurons(neurons) {}
 

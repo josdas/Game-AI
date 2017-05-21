@@ -1,9 +1,9 @@
 #pragma once
 #include "world.h"
 #include "../AI/strategy.h"
+#include "../GameConst.h"
 
 class Fight {
-	static const int MAX_TIME_GAME = 30;
 
 	World* world;
 	Strategy* first;
