@@ -4,8 +4,9 @@
 #include "../Game/unit.h"
 #include "../GameConst.h"
 
+template<class T>
 class Neural_AI : public Strategy {
-	Neural_network neural_network;
+	Neural_network<T> neural_network;
 
 	std::vector<double> get_data(World* world) const {
 		std::vector<double> data;
@@ -23,11 +24,12 @@ class Neural_AI : public Strategy {
 		data.push_back(units[unit_id]->get_y() == units[enemy_id]->get_y());
 		data.push_back(units[unit_id]->get_x() < units[enemy_id]->get_x());
 		data.push_back(units[unit_id]->get_y() < units[enemy_id]->get_y());
+		data.push_back((units[unit_id]->get_cordinate() - units[enemy_id]->get_cordinate()).length() == 1);
 		return data;
 	}
 
 public:
-	explicit Neural_AI(size_t id_unit, Neural_network const& neural_network)
+	explicit Neural_AI(size_t id_unit, Neural_network<T> const& neural_network)
 		: Strategy(id_unit),
 		  neural_network(neural_network) {}
 

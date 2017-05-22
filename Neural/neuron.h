@@ -3,12 +3,23 @@
 #include <cassert>
 #include "../Random.h"
 
-class Neuron {
-	std::vector<double> weight;
-
+struct active_function_A {
 	static double active_function(double x) {
 		return 1 / (1 + std::exp(-x));
 	}
+};
+
+struct active_function_B {
+	static double active_function(double x) {
+		return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+	}
+};
+
+
+template<class T>
+class Neuron {
+	std::vector<double> weight;
+
 	explicit Neuron(const std::vector<double>& weight)
 		: weight(weight) {}
 
@@ -26,10 +37,14 @@ public:
 		for (size_t i = 0; i < weight.size(); i++) {
 			sum += weight[i] * data[i];
 		}
-		return active_function(sum);
+		return T::active_function(sum);
 	}
 
 	std::vector<double> const& get_weight() const {
+		return weight;
+	}
+
+	std::vector<double>& get_weight() {
 		return weight;
 	}
 

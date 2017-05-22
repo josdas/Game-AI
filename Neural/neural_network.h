@@ -25,12 +25,13 @@ struct Neural_coef {
 		coefficient(coefficient) {}
 };
 
+template<class T>
 class Neural_network {
-	std::vector<Layer> layers;
+	std::vector<Layer<T> > layers;
 	std::vector<size_t> layers_size;
 
 public:
-	Neural_network(const std::vector<Layer>& layers, const std::vector<size_t>& layers_size)
+	Neural_network(const std::vector<Layer<T> >& layers, const std::vector<size_t>& layers_size)
 		: layers(layers),
 		layers_size(layers_size) {}
 
@@ -78,5 +79,10 @@ public:
 			}
 		}
 		return Neural_coef(layers_size, result);
+	}
+
+	void resize_input(size_t n) {
+		layers[0].resize(n);
+		layers_size[0] = n;
 	}
 };

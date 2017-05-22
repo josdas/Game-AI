@@ -1,11 +1,12 @@
 #pragma once
 #include "neuron.h"
 
+template<class T>
 class Layer {
-	std::vector<Neuron> neurons;
+	std::vector<Neuron<T> > neurons;
 
 public:
-	explicit Layer(const std::vector<Neuron>& neurons)
+	explicit Layer(const std::vector<Neuron<T>>& neurons)
 		: neurons(neurons) {}
 
 	explicit Layer(size_t s, size_t past) {
@@ -43,5 +44,11 @@ public:
 
 	void set(size_t a, size_t b, double x) {
 		neurons[a].set(b, x);
+	}
+
+	void resize(size_t n) {
+		for(auto &v : neurons) {
+			v.get_weight().resize(n);
+		}
 	}
 };

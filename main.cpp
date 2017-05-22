@@ -26,7 +26,7 @@ void print_with_pause(World const& world, Fight& fight) {
 	system("cls");
 }
 
-void init(int n = 60) {
+void set_random_start_positions(int n = 60) {
 	two_start_points.clear();
 	for (auto p1 : start_points) {
 		for (auto p2 : start_points) {
@@ -42,10 +42,10 @@ void init(int n = 60) {
 	}
 }
 
-
-vector<pair<Unit, Unit> > gen_fights(Neural_network const& neural_network) {
+template<class T>
+vector<pair<Unit, Unit> > gen_fights(Neural_network<T> const& neural_network) {
 	vector<pair<Unit, Unit> > result;
-	shared_ptr<Strategy> neural_AI = make_shared<Neural_AI>(
+	shared_ptr<Strategy> neural_AI = make_shared<Neural_AI<T> >(
 		1,
 		neural_network
 	);
@@ -63,29 +63,24 @@ vector<pair<Unit, Unit> > gen_fights(Neural_network const& neural_network) {
 	return result;
 }
 
-double Test_neural_network(Neural_network const& neural_network) {
-	auto temp = gen_fights(neural_network);
-	double res = 0;
-	double z = 0;
-	double e = START_HP;
+double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
+	double sum = 0;
+	double damage = 0;
+	double minimum = START_HP;
+	vector<int> my_hp;
+	size_t number = temp.size();
 	for (auto& v : temp) {
 		double f = v.first.get_hp() - v.second.get_hp();
-		if (v.first.get_hp() == 0) {
-			f -= 5;
-		}
-		if (v.second.get_hp() == 0) {
-			f += 5;
-		}
-		res += f;
-		e = min(f, e);
-		z += START_HP - v.second.get_hp();
+		sum += f;
+		minimum = min(f, minimum);
+		damage += START_HP - v.second.get_hp();
+		my_hp.push_back(v.first.get_hp());
 	}
-	res = (res / temp.size() * 2 + e) / 3 + z / temp.size() * 0.3;
-	return res;
+	sort(my_hp.begin(), my_hp.end());
+	return (sum / number + minimum) / 2 + damage / number * 0.1 + my_hp[my_hp.size() / 5];
 }
 
-double Super_test_neural_network(Neural_network const& neural_network) {
-	auto temp = gen_fights(neural_network);
+double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	double res = 0;
 	for (auto& v : temp) {
 		res += v.first.get_hp() - v.second.get_hp();
@@ -101,9 +96,10 @@ void fight(Strategy* first, Strategy* second) {
 		p2.x = get_rand_int(MAX_H);
 		p2.y = get_rand_int(MAX_W);
 	}
-	Field field(MAX_H, MAX_W);
 	Unit unit_first(p1, START_HP);
 	Unit unit_second(p2, START_HP);
+
+	Field field(MAX_H, MAX_W);
 	World world(field, &unit_first, &unit_second);
 	Fight fight(&world, first, second);
 
@@ -112,30 +108,28 @@ void fight(Strategy* first, Strategy* second) {
 	}
 }
 
-void simple_fight() {
-	Shot_AI first(0);
-	Hit_AI second(1);
-	fight(&first, &second);
-}
-
-void hard_fight_1(Neural_network const& neural_network) {
-	Neural_AI first(0, neural_network);
+template<class T>
+void hard_fight_1(Neural_network<T> const& neural_network) {
+	Neural_AI<T> first(0, neural_network);
 	Shot_AI second(1);
 	fight(&first, &second);
 }
 
-void hard_fight_2(Neural_network const& neural_network) {
-	Neural_AI first(0, neural_network);
+template<class T>
+void hard_fight_2(Neural_network<T> const& neural_network) {
+	Neural_AI<T> first(0, neural_network);
 	Hit_AI second(1);
 	fight(&first, &second);
 }
 
-void print_coeff(Neural_coef const& a) {
-	ofstream out("Result.txt", ofstream::out);
-	out << a << '\n' << MAX_H << ' ' << MAX_W << ' ' << START_HP << ' ' << MAX_TIME_GAME << '\n';
+void print_coeff(Neural_coef const& a, string name = "Result") {
+	name += ".txt";
+	ofstream out(name.c_str(), ofstream::out);
+	out << a << '\n'
+	<< MAX_H << ' ' << MAX_W << ' ' << START_HP << ' ' << MAX_TIME_GAME << '\n';
 }
 
-Neural_network read_coeff(string name) {
+Neural_coef read_coeff(string name) {
 	name = "Result_" + name + ".txt";
 	ifstream in(name.c_str(), ifstream::in);
 	int n, m;
@@ -149,10 +143,10 @@ Neural_network read_coeff(string name) {
 	for (auto& v : coefficient) {
 		in >> v;
 	}
-	return Neural_network(Neural_coef(layers_size, coefficient));
+	return Neural_coef(layers_size, coefficient);
 }
 
-double times() {
+double get_time() {
 	return clock() * 1.0 / CLOCKS_PER_SEC;
 }
 
@@ -165,58 +159,75 @@ void start() {
 		make_unique<Hit_AI>(0)
 	);
 	strategies.push_back(
-		make_unique<Neural_AI>(0, read_coeff("0"))
+		make_unique<Neural_AI<active_function_A>>(
+			0, 
+			Neural_network<active_function_A>(read_coeff("0"))
+		)
 	);
 	strategies.push_back(
-		make_unique<Neural_AI>(0, read_coeff("1"))
+		make_unique<Neural_AI<active_function_A>>(
+			0,
+			Neural_network<active_function_A>(read_coeff("2"))
+		)
+	);
+	strategies.push_back(
+		make_unique<Neural_AI<active_function_A>>(
+			0,
+			Neural_network<active_function_A>(read_coeff("3"))
+			)
 	);
 	for (int i = 0; i < MAX_H; i++) {
 		for (int j = 0; j < MAX_W; j++) {
 			start_points.emplace_back(i, j);
 		}
 	}
-	init();
+	set_random_start_positions();
 }
 
 int main() {
 	start();
+	auto neural_network = Neural_network<active_function_B>(read_coeff("3"));//Neural_network<active_function_B>(vector<size_t>{15, 20, 20, 16});
 
-	Neural_network neural_network(vector<size_t>{14, 20, 20, 16});
-	double res = Test_neural_network(neural_network);
+	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
 	double d = 10;
-	int time_to_end = 60 * 60 * 7;
+	int time_to_end = 60 * 5;
 	cerr << time_to_end << '\n';
 
-	for (int i = 0, last_new = 0, last_added = 0; times() < time_to_end; i++) {
+	for (int i = 0, last_new = 0, last_added = 0; get_time() < time_to_end; i++) {
 		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
 			last_added = last_new;
 			strategies.push_back(
-				make_unique<Neural_AI>(0, neural_network)
+				make_unique<Neural_AI<active_function_B>>(0, neural_network)
 			);
-			if (strategies.size() > 7) {
-				strategies.erase(strategies.begin() + 2);
+			if (strategies.size() > 10) {
+				strategies.erase(strategies.begin() + 6);
 			}
-		}
-		if (i == 100000) {
-			init(130);
+			res = Test_neural_network(gen_fights(neural_network));
 		}
 		auto coef = neural_network.get_coefficient();
+		if (i % 1000 == 0 && i > 0) {
+			set_random_start_positions();
+			res = Test_neural_network(gen_fights(neural_network));
+			print_coeff(coef, "Temp_res");
+		}
 		int number_it = static_cast<int>(get_rand_double(d) + 1 + d);
 		for (int j = 0; j < number_it; j++) {
 			int x = get_rand_int(coef.coefficient.size());
 			coef.coefficient[x] += get_rand_double(s);
 		}
-		auto test_net = Neural_network(coef);
-		double new_res = Test_neural_network(test_net);
+
+		auto test_net = Neural_network<active_function_B>(coef);
+		auto result = gen_fights(test_net);
+		double new_res = Test_neural_network(result);
 		if (new_res > res) {
 			res = new_res;
 			last_new = i;
 			neural_network = test_net;
 			cerr << "New result=" << new_res << ' '
-				<< "Test=" << Super_test_neural_network(test_net) << ' '
+				<< "Test=" << Super_test_neural_network(result) << ' '
 				<< "i=" << i << ' '
-				<< "Time=" << times() << '\n'
+				<< "Time=" << get_time() << '\n'
 				<< "S=" << s << ' '
 				<< "D=" << d << ' '
 				<< "Number it=" << number_it << "\n\n";
