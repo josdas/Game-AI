@@ -12,6 +12,7 @@
 #include <fstream>
 #include "GameConst.h"
 #include "Random.h"
+#include "AI/human_AI.h"
 
 using namespace std;
 
@@ -73,11 +74,11 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 		double f = v.first.get_hp() - v.second.get_hp();
 		sum += f;
 		minimum = min(f, minimum);
-		damage += START_HP - v.second.get_hp();
+		damage += START_HP - v.first.get_hp();
 		my_hp.push_back(v.first.get_hp());
 	}
 	sort(my_hp.begin(), my_hp.end());
-	return (sum / number + minimum) / 2 + damage / number * 0.1 + my_hp[my_hp.size() / 5];
+	return -damage / number + my_hp[my_hp.size() / 20];
 }
 
 double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
@@ -122,6 +123,13 @@ void hard_fight_2(Neural_network<T> const& neural_network) {
 	fight(&first, &second);
 }
 
+template<class T>
+void hard_fight_3(Neural_network<T> const& neural_network) {
+	Neural_AI<T> first(0, neural_network);
+	Human_AI second(1);
+	fight(&first, &second);
+}
+
 void print_coeff(Neural_coef const& a, string name = "Result") {
 	name += ".txt";
 	ofstream out(name.c_str(), ofstream::out);
@@ -161,13 +169,13 @@ void start() {
 	strategies.push_back(
 		make_unique<Neural_AI<active_function_A>>(
 			0, 
-			Neural_network<active_function_A>(read_coeff("0"))
+			Neural_network<active_function_A>(read_coeff("6"))
 		)
 	);
 	strategies.push_back(
 		make_unique<Neural_AI<active_function_A>>(
 			0,
-			Neural_network<active_function_A>(read_coeff("2"))
+			Neural_network<active_function_A>(read_coeff("4"))
 		)
 	);
 	strategies.push_back(
@@ -186,12 +194,13 @@ void start() {
 
 int main() {
 	start();
-	auto neural_network = Neural_network<active_function_B>(read_coeff("3"));//Neural_network<active_function_B>(vector<size_t>{15, 20, 20, 16});
+	auto neural_network = Neural_network<active_function_B>(read_coeff("def"));
+	//auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 20, 20, 16});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
 	double d = 10;
-	int time_to_end = 60 * 5;
+	int time_to_end = 60 * 20;
 	cerr << time_to_end << '\n';
 
 	for (int i = 0, last_new = 0, last_added = 0; get_time() < time_to_end; i++) {
