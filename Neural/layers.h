@@ -13,19 +13,22 @@ public:
 		neurons.resize(s);
 		for(size_t i = 0; i < s; i++) {
 			neurons[i].resize(past);
+			for(size_t j = 0; j < past; j++) {
+				neurons[i][j] = get_rand_double(1);
+			}
 		}
 	}
 
 	std::vector<double> get(std::vector<double> const& data) const {
 		std::vector<double> result(neurons.size());
 		for(size_t i = 0; i < neurons.size(); i++) {
-			double &sum = result[i];
+			double sum = 0;
 			#pragma omp parallel for reduction(+:sum)
-			for(size_t j = 0; j < data.size(); j++) {
+			for(int j = 0; j < static_cast<int>(data.size()); j++) {
 				sum += data[j] * neurons[i][j];
 			}
 			#pragma omp barrier
-			sum = T::active_function(sum);
+			result[i] = T::active_function(sum);
 		}
 		return result;
 	}

@@ -83,7 +83,7 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	for(int i = 0; i < hp_count; i++) {
 		min_sum_hp += my_hp[i];
 	}
-	return (sum / number + minimum) / 2 + damage / number * 0.3 + min_sum_hp / hp_count * 0.1;
+	return (sum / number + minimum * 3) / 4 + damage / number * 0.3 + min_sum_hp / hp_count * 0.1;
 }
 
 double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
@@ -172,21 +172,21 @@ void start() {
 		make_unique<Hit_AI>(0)
 	);
 	strategies.push_back(
-		make_unique<Neural_AI<active_function_A>>(
+		make_unique<Neural_AI<active_function_B>>(
 			0, 
-			Neural_network<active_function_A>(read_coeff("6"))
+			Neural_network<active_function_B>(read_coeff("6"))
 		)
 	);
 	strategies.push_back(
-		make_unique<Neural_AI<active_function_A>>(
+		make_unique<Neural_AI<active_function_B>>(
 			0,
-			Neural_network<active_function_A>(read_coeff("4"))
+			Neural_network<active_function_B>(read_coeff("4"))
 		)
 	);
 	strategies.push_back(
-		make_unique<Neural_AI<active_function_A>>(
+		make_unique<Neural_AI<active_function_B>>(
 			0,
-			Neural_network<active_function_A>(read_coeff("3"))
+			Neural_network<active_function_B>(read_coeff("3"))
 			)
 	);
 	for (int i = 0; i < MAX_H; i++) {
@@ -199,8 +199,8 @@ void start() {
 
 int main() {
 	start();
-	auto neural_network = Neural_network<active_function_B>(read_coeff("at"));
-	//auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 30, 20, 16});
+	//auto neural_network = Neural_network<active_function_B>(read_coeff("at"));
+	auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 30, 20, 16});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 100;
@@ -210,16 +210,16 @@ int main() {
 
 	vector<pair<int, double> > ac;
 	for (int i = 0, last_new = 0, last_added = 0; get_time() < time_to_end; i++) {
-		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
-			last_added = last_new;
-			strategies.push_back(
-				make_unique<Neural_AI<active_function_B>>(0, neural_network)
-			);
-			if (strategies.size() > 8) {
-				strategies.erase(strategies.begin() + 6);
-			}
-			res = Test_neural_network(gen_fights(neural_network));
-		}
+//		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
+//			last_added = last_new;
+//			strategies.push_back(
+//				make_unique<Neural_AI<active_function_B>>(0, neural_network)
+//			);
+//			if (strategies.size() > 8) {
+//				strategies.erase(strategies.begin() + 6);
+//			}
+//			res = Test_neural_network(gen_fights(neural_network));
+//		}
 		auto coef = neural_network.get_coefficient();
 		if (i % 1000 == 0 && i > 0) {
 			set_random_start_positions();
