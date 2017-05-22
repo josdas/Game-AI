@@ -27,7 +27,7 @@ void print_with_pause(World const& world, Fight& fight) {
 	system("cls");
 }
 
-void set_random_start_positions(int n = 60) {
+void set_random_start_positions(int n = 50) {
 	two_start_points.clear();
 	for (auto p1 : start_points) {
 		for (auto p2 : start_points) {
@@ -74,11 +74,16 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 		double f = v.first.get_hp() - v.second.get_hp();
 		sum += f;
 		minimum = min(f, minimum);
-		damage += START_HP - v.first.get_hp();
+		damage += START_HP - v.second.get_hp();
 		my_hp.push_back(v.first.get_hp());
 	}
 	sort(my_hp.begin(), my_hp.end());
-	return -damage / number + my_hp[my_hp.size() / 20];
+	double min_sum_hp = 0;
+	int hp_count = my_hp.size() / 15;
+	for(int i = 0; i < hp_count; i++) {
+		min_sum_hp += my_hp[i];
+	}
+	return (sum / number + minimum) / 2 + damage / number * 0.3 + min_sum_hp / hp_count * 0.1;
 }
 
 double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
@@ -194,22 +199,23 @@ void start() {
 
 int main() {
 	start();
-	auto neural_network = Neural_network<active_function_B>(read_coeff("def"));
-	//auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 20, 20, 16});
+	auto neural_network = Neural_network<active_function_B>(read_coeff("at"));
+	//auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 30, 20, 16});
 
 	double res = Test_neural_network(gen_fights(neural_network));
-	double s = 10;
-	double d = 10;
-	int time_to_end = 60 * 20;
+	double s = 100;
+	double d = 30;
+	int time_to_end = 60 * 5;
 	cerr << time_to_end << '\n';
 
+	vector<pair<int, double> > ac;
 	for (int i = 0, last_new = 0, last_added = 0; get_time() < time_to_end; i++) {
 		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
 			last_added = last_new;
 			strategies.push_back(
 				make_unique<Neural_AI<active_function_B>>(0, neural_network)
 			);
-			if (strategies.size() > 10) {
+			if (strategies.size() > 8) {
 				strategies.erase(strategies.begin() + 6);
 			}
 			res = Test_neural_network(gen_fights(neural_network));
@@ -220,30 +226,56 @@ int main() {
 			res = Test_neural_network(gen_fights(neural_network));
 			print_coeff(coef, "Temp_res");
 		}
-		int number_it = static_cast<int>(get_rand_double(d) + 1 + d);
-		for (int j = 0; j < number_it; j++) {
-			int x = get_rand_int(coef.coefficient.size());
-			coef.coefficient[x] += get_rand_double(s);
+		vector<pair<int, double> > vector_d;
+
+		double new_res = res;
+		auto test_net = neural_network;
+
+		for(int it = 0; it < 10; it++) {
+			int number_it = static_cast<int>(get_rand_double(d) + 1 + d);
+			vector<pair<int, double> > vector_temp;
+			auto temo_coeff = coef;
+			double sum = 0;
+			for (int j = 0; j < number_it; j++) {
+				int x = get_rand_int(coef.coefficient.size());
+				double delata = get_rand_double(1);
+				vector_temp.push_back({ x, delata });
+				sum += delata * delata;
+			}
+			sum = sqrt(sum);	
+			double range = get_rand_double(s);
+			for(auto &v: vector_temp) {
+				v.second *= range / sum;
+				temo_coeff.coefficient[v.first] += v.second;
+			}
+			auto temp_net = Neural_network<active_function_B>(temo_coeff);
+			double temp_res = Test_neural_network(gen_fights(temp_net));
+			//cerr << temp_res << '\n';
+			if(temp_res > new_res) {
+				new_res = temp_res;
+				vector_d = vector_temp;
+				test_net = temp_net;
+			}
 		}
 
-		auto test_net = Neural_network<active_function_B>(coef);
-		auto result = gen_fights(test_net);
-		double new_res = Test_neural_network(result);
 		if (new_res > res) {
 			res = new_res;
 			last_new = i;
 			neural_network = test_net;
 			cerr << "New result=" << new_res << ' '
-				<< "Test=" << Super_test_neural_network(result) << ' '
+				<< "Test=" << Super_test_neural_network(gen_fights(neural_network)) << ' '
 				<< "i=" << i << ' '
 				<< "Time=" << get_time() << '\n'
 				<< "S=" << s << ' '
-				<< "D=" << d << ' '
-				<< "Number it=" << number_it << "\n\n";
-			s *= 0.99;
-			d *= 0.99;
+				<< "D=" << d << "\n\n";
+			s *= 0.98;
+			d *= 0.98;
 			s = max(s, 0.5);
 			d = max(d, 2.0);
+		}
+		if(i % 100 == 0) {
+			s *= 0.95;
+			d *= 0.99;
 		}
 	}
 	print_coeff(neural_network.get_coefficient());
