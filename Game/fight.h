@@ -10,7 +10,6 @@ class Fight {
 	int turn;
 
 public:
-
 	Fight(World* world, Strategy* first, Strategy* second);
 
 	void next_turn();

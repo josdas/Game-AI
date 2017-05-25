@@ -32,7 +32,7 @@ inline Direction Hit_AI::get_direction(Point p) const {
 inline Hit_AI::Hit_AI(size_t id_unit): Strategy(id_unit) {}
 
 inline Action Hit_AI::next_action(World* world) const {
-	int enemy_id = unit_id ^ 1; // if there are two units
+	size_t enemy_id = unit_id ^ 1; // if there are two units
 	Point my_cordinate = world->get_units()[unit_id]->get_cordinate();
 	Point en_cordinate = world->get_units()[enemy_id]->get_cordinate();
 	Point dl = my_cordinate - en_cordinate;

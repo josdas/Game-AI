@@ -4,35 +4,36 @@
 #include <ostream>
 
 struct Neural_coef {
-	friend std::ostream& operator<<(std::ostream& out, const Neural_coef& a) {
-		out << a.layers_size.size() << '\n';
-		for (auto v : a.layers_size) {
-			out << v << ' ';
-		}
-		out << '\n';
-		out << a.coefficient.size() << '\n';
-		for (auto v : a.coefficient) {
-			out << v << ' ';
-		}
-		return out;
-	}
+	friend std::ostream& operator<<(std::ostream& out, const Neural_coef& a);
 
 	std::vector<size_t> layers_size;
-	std::vector<double> coefficient; 
-	
-	Neural_coef(const std::vector<size_t>& layers_size, const std::vector<double>& coefficient)
-		: layers_size(layers_size),
-		coefficient(coefficient) {}
+	std::vector<double> coefficient;
+
+	Neural_coef(const std::vector<size_t>& layers_size, const std::vector<double>& coefficient);
 };
 
-template<class T>
+inline std::ostream& operator<<(std::ostream& out, const Neural_coef& a) {
+	out << a.layers_size.size() << '\n';
+	for (auto v : a.layers_size) {
+		out << v << ' ';
+	}
+	out << '\n';
+	out << a.coefficient.size() << '\n';
+	for (auto v : a.coefficient) {
+		out << v << ' ';
+	}
+	return out;
+}
+
+inline Neural_coef::Neural_coef(const std::vector<size_t>& layers_size, const std::vector<double>& coefficient) :
+	layers_size(layers_size),
+	coefficient(coefficient) {}
+
 class Neural_network {
-	std::vector<Layer<T> > layers;
-	std::vector<size_t> layers_size;
+	std::vector<std::shared_ptr<Layer> > layers;
 
 public:
-	Neural_network(const std::vector<Layer<T> >& layers, const std::vector<size_t>& layers_size);
-	Neural_network(std::vector<size_t> const& S);
+	Neural_network(const std::vector<Layer*>& layers);
 	Neural_network(Neural_coef const& coef);
 
 	std::vector<double> get(std::vector<double> const& data) const;
@@ -40,58 +41,58 @@ public:
 	Neural_coef get_coefficient() const;
 };
 
-template <class T>
-Neural_network<T>::Neural_network(const std::vector<Layer<T> >& layers, const std::vector<size_t>& layers_size): layers(layers),
-                                                                                                                 layers_size(layers_size) {}
 
-template <class T>
-Neural_network<T>::Neural_network(std::vector<size_t> const& S):
-	layers_size(S) {
-	for (size_t i = 1; i < S.size(); i++) {
-		layers.emplace_back(S[i], S[i - 1]);
+inline Neural_network::Neural_network(const std::vector<Layer*>& _layers):
+	layers(_layers.size()) {
+	for (size_t i = 0; i < layers.size(); i++) {
+		layers[i].reset(_layers[i]);
 	}
 }
 
-template <class T>
-Neural_network<T>::Neural_network(Neural_coef const& coef):
-	Neural_network(coef.layers_size) {
+inline Neural_network::Neural_network(Neural_coef const& coef) {
+	for (size_t i = 1; i < coef.layers_size.size(); i++) {
+		layers.emplace_back(new Layer(coef.layers_size[i - 1], coef.layers_size[i]));
+	}
 	size_t ind = 0;
 	for (size_t i = 1; i < coef.layers_size.size(); i++) {
-		for (size_t j = 0; j <= coef.layers_size[i]; j++) {
-			for (size_t k = 0; k <= coef.layers_size[i - 1]; k++ , ind++) {
-				layers[i - 1].set(j, k, coef.coefficient[ind]);
+		for (size_t j = 0; j < coef.layers_size[i]; j++) {
+			for (size_t k = 0; k < coef.layers_size[i - 1]; k++ , ind++) {
+				layers[i - 1]->set(j, k, coef.coefficient[ind]);
 			}
 		}
 	}
 	assert(ind == coef.coefficient.size());
 }
 
-template <class T>
-std::vector<double> Neural_network<T>::get(std::vector<double> const& data) const {
+inline std::vector<double> Neural_network::get(std::vector<double> const& data) const {
 	std::vector<double> result = data;
 	for (size_t i = 0; i < layers.size(); i++) {
-		result = layers[i].get(result);
+		result = layers[i]->get(result);
 	}
 	return result;
 }
 
-template <class T>
-std::vector<std::vector<std::vector<double> > > Neural_network<T>::get_neurons_weight() const {
+inline std::vector<std::vector<std::vector<double> > > Neural_network::get_neurons_weight() const {
 	std::vector<std::vector<std::vector<double> > > result(layers.size());
 	for (size_t i = 0; i < layers.size(); i++) {
-		result[i] = layers[i].get_neurons_weight();
+		result[i] = layers[i]->get_neurons_weight();
 	}
 	return result;
 }
 
-template <class T>
-Neural_coef Neural_network<T>::get_coefficient() const {
+inline Neural_coef Neural_network::get_coefficient() const {
 	std::vector<double> result;
 	for (size_t i = 0; i < layers.size(); i++) {
-		auto temp = layers[i].get_coefficient();
+		auto temp = layers[i]->get_coefficient();
 		for (auto v : temp) {
 			result.push_back(v);
 		}
+	}
+	std::vector<size_t> layers_size;
+
+	layers_size.push_back(layers.front()->get_input_size());
+	for (auto const& v : layers) {
+		layers_size.push_back(v->get_output_size());
 	}
 	return Neural_coef(layers_size, result);
 }

@@ -4,19 +4,17 @@
 #include "../Game/unit.h"
 #include "../GameConst.h"
 
-template<class T>
 class Neural_AI : public Strategy {
-	Neural_network<T> neural_network;
+	Neural_network neural_network;
 
 	std::vector<double> get_data(World* world) const;
 public:
-	explicit Neural_AI(size_t id_unit, Neural_network<T> const& neural_network);
+	explicit Neural_AI(size_t id_unit, Neural_network const& neural_network);
 
 	Action next_action(World* world) const override;
 };
 
-template <class T>
-std::vector<double> Neural_AI<T>::get_data(World* world) const {
+inline std::vector<double> Neural_AI::get_data(World* world) const {
 	std::vector<double> data;
 	size_t enemy_id = unit_id ^ 1;
 	auto units = world->get_units();
@@ -36,12 +34,12 @@ std::vector<double> Neural_AI<T>::get_data(World* world) const {
 	return data;
 }
 
-template <class T>
-Neural_AI<T>::Neural_AI(size_t id_unit, Neural_network<T> const& neural_network): Strategy(id_unit),
-                                                                                  neural_network(neural_network) {}
+inline Neural_AI::Neural_AI(size_t id_unit, Neural_network const& neural_network):
+	Strategy(id_unit),
+	neural_network(neural_network) {}
 
-template <class T>
-Action Neural_AI<T>::next_action(World* world) const {
+
+inline Action Neural_AI::next_action(World* world) const {
 	std::vector<double> data = get_data(world);
 	std::vector<double> prob = neural_network.get(data);
 	auto ind = max_element(prob.begin(), prob.end()) - prob.begin();

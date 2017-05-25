@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <cassert>
-#include "../Random.h"
+#include "../my_random.h"
 
 struct active_function_A {
 	static double active_function(double x) {

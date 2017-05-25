@@ -11,9 +11,9 @@
 #include <ctime>
 #include <fstream>
 #include "GameConst.h"
-#include "Random.h"
+#include "my_random.h"
 #include "AI/human_AI.h"
-
+#include <vld.h>
 using namespace std;
 
 vector<Point> start_points;
@@ -43,10 +43,9 @@ void set_random_start_positions(int n = 70) {
 	}
 }
 
-template<class T>
-vector<pair<Unit, Unit> > gen_fights(Neural_network<T> const& neural_network) {
+vector<pair<Unit, Unit> > gen_fights(Neural_network const& neural_network) {
 	vector<pair<Unit, Unit> > result;
-	shared_ptr<Strategy> neural_AI = make_shared<Neural_AI<T> >(
+	shared_ptr<Strategy> neural_AI = make_shared<Neural_AI>(
 		1,
 		neural_network
 	);
@@ -79,8 +78,8 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	}
 	sort(my_hp.begin(), my_hp.end());
 	double min_sum_hp = 0;
-	int hp_count = my_hp.size() / 15;
-	for(int i = 0; i < hp_count; i++) {
+	size_t hp_count = my_hp.size() / 15;
+	for(size_t i = 0; i < hp_count; i++) {
 		min_sum_hp += my_hp[i];
 	}
 	return damage / number * 0.3 + (sum / number * 2 + minimum) / 3;
@@ -114,23 +113,20 @@ void fight(Strategy* first, Strategy* second) {
 	}
 }
 
-template<class T>
-void hard_fight_1(Neural_network<T> const& neural_network) {
-	Neural_AI<T> first(0, neural_network);
+void hard_fight_1(Neural_network const& neural_network) {
+	Neural_AI first(0, neural_network);
 	Shot_AI second(1);
 	fight(&first, &second);
 }
 
-template<class T>
-void hard_fight_2(Neural_network<T> const& neural_network) {
-	Neural_AI<T> first(0, neural_network);
+void hard_fight_2(Neural_network const& neural_network) {
+	Neural_AI first(0, neural_network);
 	Hit_AI second(1);
 	fight(&first, &second);
 }
 
-template<class T>
-void hard_fight_3(Neural_network<T> const& neural_network) {
-	Neural_AI<T> first(0, neural_network);
+void hard_fight_3(Neural_network const& neural_network) {
+	Neural_AI first(0, neural_network);
 	Human_AI second(1);
 	fight(&first, &second);
 }
@@ -181,13 +177,18 @@ void start() {
 
 int main() {
 	start();
-	auto neural_network = Neural_network<active_function_B>(read_coeff("so"));
-	//auto neural_network = Neural_network<active_function_B>(vector<size_t>{15, 18, 20, 16});
+	//auto neural_network = Neural_network<active_function_B>(read_coeff("so"));
+	//auto neural_network = Neural_network(vector<Layer>{15, 18, 20, 16});
+	auto neural_network = Neural_network(vector<Layer*>{
+		new Layer(15, 18),
+		new Layer(18, 20),
+		new Layer(20, 16)
+	});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
 	double d = 1000;
-	int time_to_end = 60 * 10;
+	int time_to_end = 20  * 1;
 	cerr << time_to_end << '\n';
 
 	vector<pair<int, double> > ac;
@@ -218,7 +219,7 @@ int main() {
 			auto temo_coeff = coef;
 			double sum = 0;
 			for (int j = 0; j < number_it; j++) {
-				int x = get_rand_int(coef.coefficient.size());
+				int x = get_rand_int(static_cast<int>(coef.coefficient.size()));
 				double delata = get_rand_double(1);
 				vector_temp.push_back({ x, delata });
 				sum += delata * delata;
@@ -226,7 +227,7 @@ int main() {
 			for(auto &v: vector_temp) {
 				temo_coeff.coefficient[v.first] += v.second;
 			}
-			auto temp_net = Neural_network<active_function_B>(temo_coeff);
+			auto temp_net = Neural_network(temo_coeff);
 			double temp_res = Test_neural_network(gen_fights(temp_net));
 			if(temp_res >= new_res) {
 				new_res = temp_res;
@@ -255,8 +256,8 @@ int main() {
 		}
 	}
 	print_coeff(neural_network.get_coefficient());
-	while (true) {
-		hard_fight_1(neural_network);
-		hard_fight_2(neural_network);
-	}
+//	while (true) {
+//		hard_fight_1(neural_network);
+//		hard_fight_2(neural_network);
+//	}
 }
