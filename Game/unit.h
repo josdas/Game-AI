@@ -40,69 +40,86 @@ class Unit {
 	int hp;
 
 public:
-	void update() {
-		time_to_next_turn = std::max(time_to_next_turn - 1, 0);
-	}
+	void update();
+	bool is_free() const;
 
-	bool is_free() const {
-		return time_to_next_turn == 0 && get_hp() > 0;
-	}
+	Unit(const Point& cordinate, int hp);
 
-	Unit(const Point& cordinate, int hp)
-		: time_to_next_turn(0),
-		  cordinate(cordinate),
-		  hp(hp) {}
+	int get_x() const;
+	int get_time() const;
+	int get_y() const;
+	Point get_cordinate() const;
+	int get_hp() const;
 
-	int get_x() const {
-		return cordinate.x;
-	}
+	void damage(int d);
 
-	int get_time() const {
-		return time_to_next_turn;
-	}
-
-	int get_y() const {
-		return cordinate.y;
-	}
-
-	Point get_cordinate() const {
-		return cordinate;
-	}
-
-	int get_hp() const {
-		return hp;
-	}
-
-	void damage(int d) {
-		hp = std::max(hp - d, 0);
-	}
-
-	bool go(Direction direction, World* world) {
-		time_to_next_turn += SLEEP_GO;
-		Point nc = cordinate + dc[direction];
-		if (world->inside(nc) && world->is_empty(nc)) {
-			cordinate = nc;
-			return true;
-		}
-		return false;
-	}
-
-	void shot(Direction direction, World* world) {
-		time_to_next_turn += SLEEP_SHOT;
-		Point nc = dc[direction];
-		world->shot(cordinate + nc, nc, DAMAGE_SHOT);
-	}
-
-	void hit(Direction direction, World* world) {
-		time_to_next_turn += SLEEP_HIT;
-		Point nc = dc[direction];
-		world->shot(cordinate + nc, nc, DAMAGE_HIT, 1);
-	}
-
-	void sleep() {
-		time_to_next_turn += SLEEP;
-	}
+	bool go(Direction direction, World* world);
+	void shot(Direction direction, World* world);
+	void hit(Direction direction, World* world);
+	void sleep();
 };
+
+inline void Unit::update() {
+	time_to_next_turn = std::max(time_to_next_turn - 1, 0);
+}
+
+inline bool Unit::is_free() const {
+	return time_to_next_turn == 0 && get_hp() > 0;
+}
+
+inline Unit::Unit(const Point& cordinate, int hp): time_to_next_turn(0),
+                                                   cordinate(cordinate),
+                                                   hp(hp) {}
+
+inline int Unit::get_x() const {
+	return cordinate.x;
+}
+
+inline int Unit::get_time() const {
+	return time_to_next_turn;
+}
+
+inline int Unit::get_y() const {
+	return cordinate.y;
+}
+
+inline Point Unit::get_cordinate() const {
+	return cordinate;
+}
+
+inline int Unit::get_hp() const {
+	return hp;
+}
+
+inline void Unit::damage(int d) {
+	hp = std::max(hp - d, 0);
+}
+
+inline bool Unit::go(Direction direction, World* world) {
+	time_to_next_turn += SLEEP_GO;
+	Point nc = cordinate + dc[direction];
+	if (world->inside(nc) && world->is_empty(nc)) {
+		cordinate = nc;
+		return true;
+	}
+	return false;
+}
+
+inline void Unit::shot(Direction direction, World* world) {
+	time_to_next_turn += SLEEP_SHOT;
+	Point nc = dc[direction];
+	world->shot(cordinate + nc, nc, DAMAGE_SHOT);
+}
+
+inline void Unit::hit(Direction direction, World* world) {
+	time_to_next_turn += SLEEP_HIT;
+	Point nc = dc[direction];
+	world->shot(cordinate + nc, nc, DAMAGE_HIT, 1);
+}
+
+inline void Unit::sleep() {
+	time_to_next_turn += SLEEP;
+}
 
 
 struct Action {
