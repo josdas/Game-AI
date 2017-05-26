@@ -1,7 +1,4 @@
 #pragma once
-#include <vector>
-#include <cassert>
-#include "../my_random.h"
 
 struct active_function_A {
 	static double active_function(double x) {
@@ -12,5 +9,11 @@ struct active_function_A {
 struct active_function_B {
 	static double active_function(double x) {
 		return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+	}
+};
+
+struct active_function_linear {
+	static double active_function(double x) {
+		return x > 0;
 	}
 };

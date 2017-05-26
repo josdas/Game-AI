@@ -14,6 +14,8 @@
 #include "my_random.h"
 #include "AI/human_AI.h"
 #include <vld.h>
+#include "Neural/active_layer.h"
+#include "Neural/active_layer_const.h"
 using namespace std;
 
 vector<Point> start_points;
@@ -179,16 +181,21 @@ int main() {
 	start();
 	//auto neural_network = Neural_network<active_function_B>(read_coeff("so"));
 	//auto neural_network = Neural_network(vector<Layer>{15, 18, 20, 16});
+//	auto neural_network = Neural_network(vector<Layer*>{
+//		new Actiev_layer_const<active_function_linear>(15, 18),
+//		new Actiev_layer<active_function_B>(18, 20),
+//		new Actiev_layer<active_function_B>(20, 16)
+//	});
 	auto neural_network = Neural_network(vector<Layer*>{
-		new Layer(15, 18),
-		new Layer(18, 20),
-		new Layer(20, 16)
-	});
+				new Actiev_layer_const<active_function_linear>(15, 5),
+				new Actiev_layer<active_function_B>(5, 5),
+				new Actiev_layer<active_function_B>(5, 16)
+			});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
 	double d = 1000;
-	int time_to_end = 20  * 1;
+	int time_to_end = 60  * 2;
 	cerr << time_to_end << '\n';
 
 	vector<pair<int, double> > ac;

@@ -1,13 +1,18 @@
 #pragma once
 #include <vector>
 #include "layers.h"
+#include "active_layer.h"
 #include <ostream>
+#include "../my_stream.h"
 
 struct Neural_coef {
-	friend std::ostream& operator<<(std::ostream& out, const Neural_coef& a);
+	enum class layer_type {
 
+	};
+	friend std::ostream& operator<<(std::ostream& out, const Neural_coef& a);
 	std::vector<size_t> layers_size;
 	std::vector<double> coefficient;
+	std::vector<layer_type> layers_type;
 
 	Neural_coef(const std::vector<size_t>& layers_size, const std::vector<double>& coefficient);
 };
@@ -50,18 +55,11 @@ inline Neural_network::Neural_network(const std::vector<Layer*>& _layers):
 }
 
 inline Neural_network::Neural_network(Neural_coef const& coef) {
+	My_stream stream(coef.coefficient);
 	for (size_t i = 1; i < coef.layers_size.size(); i++) {
-		layers.emplace_back(new Layer(coef.layers_size[i - 1], coef.layers_size[i]));
+		layers.emplace_back(new Actiev_layer<active_function_B>(coef.layers_size[i - 1], coef.layers_size[i], stream));
 	}
-	size_t ind = 0;
-	for (size_t i = 1; i < coef.layers_size.size(); i++) {
-		for (size_t j = 0; j < coef.layers_size[i]; j++) {
-			for (size_t k = 0; k < coef.layers_size[i - 1]; k++ , ind++) {
-				layers[i - 1]->set(j, k, coef.coefficient[ind]);
-			}
-		}
-	}
-	assert(ind == coef.coefficient.size());
+	assert(stream.end());
 }
 
 inline std::vector<double> Neural_network::get(std::vector<double> const& data) const {
