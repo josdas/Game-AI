@@ -16,6 +16,7 @@ public:
 	~Actiev_layer() override = default;
 
 	virtual std::vector<double> get(std::vector<double> const& data) const override;
+	int get_type() override;
 };
 
 template <class T>
@@ -37,6 +38,7 @@ std::vector<double> Actiev_layer<T>::get_sum(std::vector<double> const& data) co
 			sum += data[j] * neurons[i][j];
 		}
 		//#pragma omp barrier
+		result[i] = sum;
 	}
 	return result;
 }
@@ -54,4 +56,9 @@ Actiev_layer<T>::Actiev_layer(size_t in, size_t out, My_stream& stream):
 template <class T>
 std::vector<double> Actiev_layer<T>::get(std::vector<double> const& data) const {
 	return active(get_sum(data));
+}
+
+template <class T>
+int Actiev_layer<T>::get_type() {
+	return T::type_number;
 }

@@ -2,6 +2,7 @@
 #include "neuron.h"
 #include "../my_random.h"
 #include "../my_stream.h"
+#include "neural_network.h"
 
 class My_stream;
 
@@ -20,13 +21,13 @@ public:
 	virtual std::vector<double> get(std::vector<double> const& data) const = 0;
 
 	std::vector<std::vector<double> > const& get_neurons_weight() const;
-	virtual  std::vector<double> get_coefficient() const;
+	virtual std::vector<double> get_coefficient() const;
 
 	void set(size_t a, size_t b, double x);
 
 	size_t get_input_size() const;
 	size_t get_output_size() const;
-	virtual void create(const std::vector<double>& coeff, size_t& ind);
+	virtual int get_type() = 0;
 };
 
 inline Layer::Layer(const std::vector<std::vector<double> >& neurons):
@@ -81,12 +82,4 @@ inline size_t Layer::get_input_size() const {
 
 inline size_t Layer::get_output_size() const {
 	return output_size;
-}
-
-inline void Layer::create(const std::vector<double>& coeff, size_t& ind) {
-	for (size_t j = 0; j < output_size; j++) {
-		for (size_t k = 0; k < input_size; k++, ind++) {
-			set(j, k, coeff[ind]);
-		}
-	}
 }

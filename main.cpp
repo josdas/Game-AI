@@ -13,7 +13,7 @@
 #include "GameConst.h"
 #include "my_random.h"
 #include "AI/human_AI.h"
-#include <vld.h>
+//#include <vld.h>
 #include "Neural/active_layer.h"
 #include "Neural/active_layer_const.h"
 using namespace std;
@@ -149,12 +149,18 @@ Neural_coef read_coeff(string name) {
 	for (auto& v : layers_size) {
 		in >> v;
 	}
+	vector<layer_type> layers_type(n);
+	for (auto& v : layers_type) {
+		int t;
+		in >> t;
+		v = static_cast<layer_type>(t);
+	}
 	in >> m;
 	vector<double> coefficient(m);
 	for (auto& v : coefficient) {
 		in >> v;
 	}
-	return Neural_coef(layers_size, coefficient);
+	return Neural_coef(layers_size, coefficient, layers_type);
 }
 
 double get_time() {
@@ -181,16 +187,11 @@ int main() {
 	start();
 	//auto neural_network = Neural_network<active_function_B>(read_coeff("so"));
 	//auto neural_network = Neural_network(vector<Layer>{15, 18, 20, 16});
-//	auto neural_network = Neural_network(vector<Layer*>{
-//		new Actiev_layer_const<active_function_linear>(15, 18),
-//		new Actiev_layer<active_function_B>(18, 20),
-//		new Actiev_layer<active_function_B>(20, 16)
-//	});
 	auto neural_network = Neural_network(vector<Layer*>{
-				new Actiev_layer_const<active_function_linear>(15, 5),
-				new Actiev_layer<active_function_B>(5, 5),
-				new Actiev_layer<active_function_B>(5, 16)
-			});
+		new Actiev_layer_const<active_function_linear>(15, 18),
+		new Actiev_layer<active_function_B>(18, 20),
+		new Actiev_layer<active_function_B>(20, 16)
+	});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
@@ -263,8 +264,8 @@ int main() {
 		}
 	}
 	print_coeff(neural_network.get_coefficient());
-//	while (true) {
-//		hard_fight_1(neural_network);
-//		hard_fight_2(neural_network);
-//	}
+	while (true) {
+		hard_fight_1(neural_network);
+		hard_fight_2(neural_network);
+	}
 }

@@ -16,7 +16,7 @@ public:
 
 	std::vector<double> get(std::vector<double> const& data) const override;
 	std::vector<double> get_coefficient() const override;
-	void create(const std::vector<double>& coeff, size_t& ind) override;
+	int get_type() override;
 };
 
 template <class T>
@@ -58,16 +58,8 @@ std::vector<double> Actiev_layer_const<T>::get_coefficient() const {
 }
 
 template <class T>
-void Actiev_layer_const<T>::create(const std::vector<double>& coeff, size_t& ind) {
-	for (size_t j = 0; j < output_size; j++) {
-		for (size_t k = 0; k < input_size; k++, ind++) {
-			set(j, k, coeff[ind]);
-		}
-	}
-	cnst.resize(output_size);
-	for(size_t j = 0; j < output_size; j++, ind++) {
-		cnst[j] = coeff[ind];
-	}
+int Actiev_layer_const<T>::get_type() {
+	return T::type_number + NUMBER_OF_ACTIVE_FUNCTION;
 }
 
 template <class T>
