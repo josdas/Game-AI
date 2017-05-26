@@ -14,8 +14,6 @@
 #include "my_random.h"
 #include "AI/human_AI.h"
 //#include <vld.h>
-#include "Neural/active_layer.h"
-#include "Neural/active_layer_const.h"
 using namespace std;
 
 vector<Point> start_points;
@@ -69,10 +67,14 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	double sum = 0;
 	double damage = 0;
 	double minimum = START_HP;
+	double dead_count = 0;
 	vector<int> my_hp;
 	size_t number = temp.size();
 	for (auto& v : temp) {
 		double f = v.first.get_hp() - v.second.get_hp();
+		if(v.first.get_hp() == 0) {
+			dead_count++;
+		}
 		sum += f;
 		minimum = min(f, minimum);
 		damage += START_HP - v.second.get_hp();
@@ -80,11 +82,11 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	}
 	sort(my_hp.begin(), my_hp.end());
 	double min_sum_hp = 0;
-	size_t hp_count = my_hp.size() / 15;
+	size_t hp_count = my_hp.size() / 5;
 	for(size_t i = 0; i < hp_count; i++) {
 		min_sum_hp += my_hp[i];
 	}
-	return damage / number * 0.3 + (sum / number * 2 + minimum) / 3;
+	return damage / number * 0.3 + (sum / number + minimum) / 2 - dead_count / number * 3;
 }
 
 double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
@@ -149,7 +151,7 @@ Neural_coef read_coeff(string name) {
 	for (auto& v : layers_size) {
 		in >> v;
 	}
-	vector<layer_type> layers_type(n);
+	vector<layer_type> layers_type(n - 1);
 	for (auto& v : layers_type) {
 		int t;
 		in >> t;
@@ -175,6 +177,9 @@ void start() {
 	strategies.push_back(
 		make_unique<Hit_AI>(0)
 	);
+	strategies.push_back(
+		make_unique<Neural_AI>(0, Neural_network(read_coeff("so")))
+	);
 	for (int i = 0; i < MAX_H; i++) {
 		for (int j = 0; j < MAX_W; j++) {
 			start_points.emplace_back(i, j);
@@ -185,32 +190,37 @@ void start() {
 
 int main() {
 	start();
-	//auto neural_network = Neural_network<active_function_B>(read_coeff("so"));
+	auto neural_network = Neural_network(read_coeff("hp"));
 	//auto neural_network = Neural_network(vector<Layer>{15, 18, 20, 16});
-	auto neural_network = Neural_network(vector<Layer*>{
-		new Actiev_layer_const<active_function_linear>(15, 18),
-		new Actiev_layer<active_function_B>(18, 20),
-		new Actiev_layer<active_function_B>(20, 16)
-	});
+//	auto neural_network = Neural_network(vector<Layer*>{
+//		new Actiev_layer_const<active_function_linear>(15, 18),
+//		new Actiev_layer<active_function_B>(18, 20),
+//		new Actiev_layer<active_function_B>(20, 16)
+//	});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
-	double d = 1000;
-	int time_to_end = 60  * 2;
+	double d = 50;
+	int time_to_end = 60 * 5;
 	cerr << time_to_end << '\n';
 
 	vector<pair<int, double> > ac;
 	for (int i = 0, last_new = 0, last_added = 0; get_time() < time_to_end; i++) {
-//		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
-//			last_added = last_new;
-//			strategies.push_back(
-//				make_unique<Neural_AI<active_function_B>>(0, neural_network)
-//			);
-//			if (strategies.size() > 8) {
-//				strategies.erase(strategies.begin() + 6);
-//			}
-//			res = Test_neural_network(gen_fights(neural_network));
-//		}
+		if(i - last_new > 1000) {
+			s += 1;
+			d += 2;
+			last_new = i;
+		}
+		if (i % 5000 == 0 && i > 0 && last_added != last_new) {
+			last_added = last_new;
+			strategies.push_back(
+				make_unique<Neural_AI>(Neural_AI(0, neural_network))
+			);
+			if (strategies.size() > 6) {
+				strategies.erase(strategies.begin() + 4);
+			}
+			res = Test_neural_network(gen_fights(neural_network));
+		}
 		auto coef = neural_network.get_coefficient();
 		if (i % 1000 == 0 && i > 0) {
 			set_random_start_positions();
@@ -259,8 +269,8 @@ int main() {
 			d = max(d, 2.0);
 		}
 		if(i % 1000 == 0) {
-			s *= 0.98;
-			d *= 0.95;
+			s *= 0.99;
+			d *= 0.98;
 		}
 	}
 	print_coeff(neural_network.get_coefficient());

@@ -7,7 +7,7 @@
 template<class T>
 class Actiev_layer: public Layer {
 protected:
-	std::vector<double> active(std::vector<double> data) const;
+	std::vector<double> active(std::vector<double>& data) const;
 	std::vector<double> get_sum(std::vector<double> const& data) const;
 public:
 	explicit Actiev_layer(const std::vector<std::vector<double> >& neurons);
@@ -20,7 +20,7 @@ public:
 };
 
 template <class T>
-std::vector<double> Actiev_layer<T>::active(std::vector<double> data) const {
+std::vector<double> Actiev_layer<T>::active(std::vector<double>& data) const {
 	for(auto &v : data) {
 		v = T::active_function(v);
 	}

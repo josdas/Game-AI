@@ -7,7 +7,7 @@
 template<class T>
 class Actiev_layer_const: public Actiev_layer<T> {
 	std::vector<double> cnst;
-	std::vector<double> change(std::vector<double> data) const;
+	std::vector<double> change(std::vector<double>& data) const;
 public:
 	Actiev_layer_const(const std::vector<std::vector<double> >& neurons, const std::vector<double>& cnst);
 	Actiev_layer_const(size_t in, size_t out);
@@ -63,7 +63,7 @@ int Actiev_layer_const<T>::get_type() {
 }
 
 template <class T>
-std::vector<double> Actiev_layer_const<T>::change(std::vector<double> data) const {
+std::vector<double> Actiev_layer_const<T>::change(std::vector<double>& data) const {
 	for(size_t i = 0; i < data.size(); i++) {
 		data[i] += cnst[i];
 	}
