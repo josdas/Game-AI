@@ -5,7 +5,7 @@
 #include "active_layer.h"
 
 template<class T>
-class Actiev_layer_const: public Actiev_layer<T> {
+class Actiev_layer_const: public Active_layer<T> {
 	std::vector<double> cnst;
 	std::vector<double> change(std::vector<double>& data) const;
 public:
@@ -21,12 +21,12 @@ public:
 
 template <class T>
 Actiev_layer_const<T>::Actiev_layer_const(const std::vector<std::vector<double> >& neurons, const std::vector<double>& cnst): 
-	Actiev_layer<T>(neurons),
+	Active_layer<T>(neurons),
 	cnst(cnst) {}
 
 template <class T>
 Actiev_layer_const<T>::Actiev_layer_const(size_t in, size_t out): 
-	Actiev_layer<T>(in, out),
+	Active_layer<T>(in, out),
 	cnst(out) {
 	for(auto &v : cnst) {
 		v = get_rand_double(0.5);
@@ -35,7 +35,7 @@ Actiev_layer_const<T>::Actiev_layer_const(size_t in, size_t out):
 
 template <class T>
 Actiev_layer_const<T>::Actiev_layer_const(size_t in, size_t out, My_stream& stream):
-	Actiev_layer<T>(in, out, stream),
+	Active_layer<T>(in, out, stream),
 	cnst(stream.get_block(out)) {}
 
 template <class T>

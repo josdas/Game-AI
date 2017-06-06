@@ -77,7 +77,7 @@ inline Neural_network::Neural_network(Neural_coef const& coef) {
 	for (size_t i = 1; i < coef.layers_size.size(); i++) {
 		switch(coef.layers_type[i - 1]) {
 		case ACTIVE_A:
-			layers.emplace_back(new Actiev_layer<active_function_A>(
+			layers.emplace_back(new Active_layer<active_function_A>(
 				coef.layers_size[i - 1],
 				coef.layers_size[i],
 				stream
@@ -91,7 +91,7 @@ inline Neural_network::Neural_network(Neural_coef const& coef) {
 			));
 			break;
 		case ACTIVE_B:
-			layers.emplace_back(new Actiev_layer<active_function_B>(
+			layers.emplace_back(new Active_layer<active_function_B>(
 				coef.layers_size[i - 1],
 				coef.layers_size[i],
 				stream
@@ -105,7 +105,7 @@ inline Neural_network::Neural_network(Neural_coef const& coef) {
 			));
 			break;
 		case ACTIVE_L:
-			layers.emplace_back(new Actiev_layer<active_function_linear>(
+			layers.emplace_back(new Active_layer<active_function_linear>(
 				coef.layers_size[i - 1],
 				coef.layers_size[i],
 				stream

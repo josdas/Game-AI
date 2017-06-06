@@ -86,7 +86,7 @@ double Test_neural_network(vector<pair<Unit, Unit> > const& temp) {
 	for(size_t i = 0; i < hp_count; i++) {
 		min_sum_hp += my_hp[i];
 	}
-	return damage / number * 0.3 + (sum / number + minimum) / 2 - dead_count / number * 3;
+	return damage / number * 0.5 + (sum / number + minimum) / 2;
 }
 
 double Super_test_neural_network(vector<pair<Unit, Unit> > const& temp) {
@@ -135,6 +135,12 @@ void hard_fight_3(Neural_network const& neural_network) {
 	fight(&first, &second);
 }
 
+void hard_fight_self(Neural_network const& neural_network) {
+	Neural_AI first(0, neural_network);
+	Neural_AI second(1, neural_network);
+	fight(&first, &second);
+}
+
 void print_coeff(Neural_coef const& a, string name = "Result") {
 	name += ".txt";
 	ofstream out(name.c_str(), ofstream::out);
@@ -180,6 +186,9 @@ void start() {
 	strategies.push_back(
 		make_unique<Neural_AI>(0, Neural_network(read_coeff("so")))
 	);
+	strategies.push_back(
+		make_unique<Neural_AI>(0, Neural_network(read_coeff("hp")))
+	);
 	for (int i = 0; i < MAX_H; i++) {
 		for (int j = 0; j < MAX_W; j++) {
 			start_points.emplace_back(i, j);
@@ -190,18 +199,17 @@ void start() {
 
 int main() {
 	start();
-	auto neural_network = Neural_network(read_coeff("hp"));
-	//auto neural_network = Neural_network(vector<Layer>{15, 18, 20, 16});
-//	auto neural_network = Neural_network(vector<Layer*>{
-//		new Actiev_layer_const<active_function_linear>(15, 18),
-//		new Actiev_layer<active_function_B>(18, 20),
-//		new Actiev_layer<active_function_B>(20, 16)
-//	});
+	//auto neural_network = Neural_network(read_coeff("d"));
+	auto neural_network = Neural_network(vector<Layer*>{
+		new Active_layer<active_function_B>(15, 20),
+		new Actiev_layer_const<active_function_linear>(20, 20),
+		new Active_layer<active_function_B>(20, 16)
+	});
 
 	double res = Test_neural_network(gen_fights(neural_network));
 	double s = 10;
-	double d = 50;
-	int time_to_end = 60 * 5;
+	double d = 500;
+	int time_to_end = 60 * 10;
 	cerr << time_to_end << '\n';
 
 	vector<pair<int, double> > ac;
@@ -269,13 +277,14 @@ int main() {
 			d = max(d, 2.0);
 		}
 		if(i % 1000 == 0) {
-			s *= 0.99;
-			d *= 0.98;
+			s *= 0.97;
+			d *= 0.95;
 		}
 	}
 	print_coeff(neural_network.get_coefficient());
 	while (true) {
 		hard_fight_1(neural_network);
 		hard_fight_2(neural_network);
+		hard_fight_self(neural_network);
 	}
 }
